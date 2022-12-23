@@ -1,0 +1,64 @@
+{
+  "availableDoorSound": [
+    {
+      "name" : "No Sound",
+      "soundSet": "",
+      "Params": "",
+      "value": 0.0
+    },
+    {
+      "name" : "24/7 Door",
+      "soundSet": "hash_f1e8d9fe",
+      "Params": "hash_0246d335",
+      "value": 0.7
+    },
+    {
+      "name" : "Pushed Door",
+      "soundSet": "hash_7f11a20c",
+      "Params": "hash_0246d335",
+      "value": 0.7
+    },
+    {
+      "name" : "Elevator Door",
+      "soundSet": "hash_37d314bf",
+      "Params": "hash_1ec7576e",
+      "value": 0.7
+    },
+    {
+      "name" : "Jail Door",
+      "soundSet": "hash_0d2cd7d4",
+      "Params": "hash_0246d335",
+      "value": 0.7
+    },
+    {
+      "name" : "Sliding Door",
+      "soundSet": "hash_c9e95a9a",
+      "Params": "hash_25b9f39f",
+      "value": 0.7
+    },
+    {
+      "name" : "Normal Gate",
+      "soundSet": "hash_d5377a40",
+      "Params": "hash_c85140b1",
+      "value": 0.7
+    },
+    {
+      "name" : "Slide Gate",
+      "soundSet": "hash_f0d1de2a",
+      "Params": "hash_8c484a48",
+      "value": 0.7
+    },
+    {
+      "name" : "Slide Gate 2",
+      "soundSet": "hash_a526a46e",
+      "Params": "hash_8c484a48",
+      "value": 0.7
+    },
+    {
+      "name" : "Up-Down Gate",
+      "soundSet": "hash_0ca57a12",
+      "Params": "hash_943a667a",
+      "value": 0.7
+    }
+  ]
+}
