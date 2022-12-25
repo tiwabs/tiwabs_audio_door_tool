@@ -22,28 +22,39 @@ var value: number
     return result
   }
 
+  function xmlDataToArray(xml: any) {
+    xml['0'].Item.forEach((item: any) => {
+      console.log("Item $ = ", item.$)
+      console.log("Item $ = ", item.$.type)
+      if (item.$.type == 'Door') {
+        console.log("Item $ = ", item.Name)
+        console.log("Item $ = ", item.Params)
+        console.log("Item $ = ", item.SoundSet)
+        console.log("Item $ = ", item.Unk1)
+      } else if (item.$.type == 'DoorModel') {
+        console.log("Item $ = ", item.Name)
+        console.log("Item $ = ", item.Door)
+      }
+    })
+  }
+
 export function Home() {
   // when app has loaded receive config from electron
   const [config, setConfig] = useState<any>([])
   useEffect( () => { window.Main.on('Loaded', (receiveConfig: any) => { setConfig(receiveConfig); sendAvailableDoorSounds(receiveConfig.availableDoorSound) }) }, [])
 
   useEffect(()=> {
-      // console.log(JSON.stringify(doorValue, null, '\t'))
-  }, [doorValue])
+    window.Main.on('xmlData', (data: any) => { xmlDataToArray(data); console.log(data, null, '\t') }) }, [])
   
   // Shitty way to force re-render
   var random = Math.random() * 1000
   const [render, setRender] = useState<number>(0)
 
-
-  const [importOpened, setImportOpened] = useState(false);
   const [newOpened, setNewOpened] = useState(false);
   const [editOpened, setEditOpened] = useState(false)
 
   const [HashToConvert, setHashToConvert] = useState<string>('')
   const [convertedHash, setConvertedHash] = useState<string>('')
-
-  const [fileName, setFileName] = useState<string>('')
 
   function getHash(key: string) {
     var keyLowered = key.toLowerCase()
@@ -136,39 +147,6 @@ export function Home() {
   return (
     <>
       <NotificationsProvider>
-        {/* MODAL IMPORT FILE */}
-        <Modal
-          opened={importOpened}
-          onClose={()=> {setImportOpened(false)}}
-          closeOnClickOutside={false}
-          title="Import Door audio files"
-        >
-          <Dropzone
-            onDrop={(files) => {console.log('accepted files', files); console.log("path:" + files[0].path)}}
-            onReject={(files) => console.log('rejected files', files)}
-            maxSize={3 * 1024 ** 2}
-            accept={["text/xml"]}
-          >
-            <Group position="center" spacing="xl" style={{ minHeight: 220, pointerEvents: 'none' }}>
-              <Dropzone.Accept>
-                Accepet
-              </Dropzone.Accept>
-              <Dropzone.Reject>
-                Rejected
-              </Dropzone.Reject>
-              <Dropzone.Idle>
-                <AiFillFileAdd/>
-              </Dropzone.Idle>
-
-              <div>
-                <Text size="md" inline>
-                  Drag your audio file here or click to select files
-                </Text>
-              </div>
-            </Group>
-          </Dropzone>
-        </Modal>
-
         {/* MODAL NEW DOOR */}
         <Modal
           opened={newOpened}
@@ -227,7 +205,7 @@ export function Home() {
           <SimpleGrid cols={1} verticalSpacing="xs" sx={{padding: "10px"}}>
             <Group grow>
               <Group grow>
-                <Button disabled variant="outline" color={'red'} onClick={()=> {setImportOpened(!importOpened)}}>Import file</Button>
+                <Button variant="outline" color={'red'} onClick={()=> {window.Main.sendMessage('openFile')}}>Import file</Button>
                 <Button disabled variant="outline" color={'red'} onClick={()=> {}}>Settings</Button>
               </Group>
               <Button variant="outline" color={'red'} onClick={()=> {setNewOpened(!newOpened)}}>Add a new door</Button>
@@ -237,18 +215,8 @@ export function Home() {
             {doorsCard()}
           </ScrollArea>
           <Group grow sx={{padding: '10px'}}>
-            <TextInput placeholder="Enter the file name" value={fileName} onChange={(event) => {setFileName(event.currentTarget.value)}} 
-            />
             <Button variant="outline" color={"red"} onClick={() => {
-              if (fileName.length < 1) {
-                showNotification({
-                  autoClose: 2500,
-                  title: "Error",
-                  message: "You need to set the file name generate a file",
-                  color: "red",
-                  icon: "!",
-                })
-              } else if (doorValue.length < 1) {
+              if (doorValue.length < 1) {
                 showNotification({
                   autoClose: 2500,
                   title: "Error",
@@ -257,7 +225,7 @@ export function Home() {
                   icon: "!",
                 })
               } else {
-                window.Main.sendMessage('generate', doorValue, fileName)
+                window.Main.sendMessage('generate', doorValue)
               }
               }}>Generate Audio File</Button>
           </Group>
