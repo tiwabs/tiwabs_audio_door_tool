@@ -9,7 +9,7 @@ export const api = {
    * The function below can accessed using `window.Main.sayHello`
    */
 
-  sendMessage: (message: string,data?: any, data2?: any) => { 
+  sendMessage: (message: string, data?: any, data2?: any) => { 
     ipcRenderer.send('message', message, data, data2)
   },
 

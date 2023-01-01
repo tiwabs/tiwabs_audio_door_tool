@@ -11,32 +11,6 @@ var soundSet: string
 var Params: string
 var value: number
 
-  
-  function arrayFindExisting(findThisValue: string) {
-    var result
-    doorValue.find((item: any) => {
-      if (item.doorName === findThisValue){
-        result = true
-      }
-    })
-    return result
-  }
-
-  function xmlDataToArray(xml: any) {
-    xml['0'].Item.forEach((item: any) => {
-      console.log("Item $ = ", item.$)
-      console.log("Item $ = ", item.$.type)
-      if (item.$.type == 'Door') {
-        console.log("Item $ = ", item.Name)
-        console.log("Item $ = ", item.Params)
-        console.log("Item $ = ", item.SoundSet)
-        console.log("Item $ = ", item.Unk1)
-      } else if (item.$.type == 'DoorModel') {
-        console.log("Item $ = ", item.Name)
-        console.log("Item $ = ", item.Door)
-      }
-    })
-  }
 
 export function Home() {
   // when app has loaded receive config from electron
@@ -44,7 +18,7 @@ export function Home() {
   useEffect( () => { window.Main.on('Loaded', (receiveConfig: any) => { setConfig(receiveConfig); sendAvailableDoorSounds(receiveConfig.availableDoorSound) }) }, [])
 
   useEffect(()=> {
-    window.Main.on('xmlData', (data: any) => { xmlDataToArray(data); console.log(data, null, '\t') }) }, [])
+    window.Main.on('xmlData', (data: any) => { xmlDataToArray(data['Dat151']['Items']) }) }, [])
   
   // Shitty way to force re-render
   var random = Math.random() * 1000
@@ -55,6 +29,8 @@ export function Home() {
 
   const [HashToConvert, setHashToConvert] = useState<string>('')
   const [convertedHash, setConvertedHash] = useState<string>('')
+  const [availableDoorSound, setAvailableDoorSound] = useState([])
+  const [selectedDoorSound, setSelectedDoorSound] = useState<string | null>("")
 
   function getHash(key: string) {
     var keyLowered = key.toLowerCase()
@@ -84,9 +60,37 @@ export function Home() {
       }
     })
   }
+  
+  function arrayFindExisting(findThisValue: string) {
+    var result
+    doorValue.find((item: any) => {
+      if (item.doorName === findThisValue){
+        result = true
+      }
+    })
+    return result
+  }
 
-  const [availableDoorSound, setAvailableDoorSound] = useState([])
-  const [selectedDoorSound, setSelectedDoorSound] = useState<string | null>("")
+  function xmlDataToArray(xml: any) {
+    xml["0"].Item.forEach((item: any) => {
+      console.log("Item $ = ", item.$)
+      console.log("Item type = ", item.$.type)
+      if (item.$.type == "Door") {
+        console.log(JSON.stringify(item, null, '\t'))
+        console.log("Item Name = ", item.Name)
+        console.log("Item Params = ", item.Params)
+        console.log("Item SoundSet = ", item.SoundSet)
+        console.log("Item Unk1 = ", item.Unk1[0].$.value)
+        const str = String(item.Name)
+        const split = str.slice(2, -1)
+        // console.log(split)
+        const insertData = {"doorName": split, "doorHash": item.Name.includes("hash_") ? item.Name : getHash(`${item.Name}`), "soundSet": item.SoundSet, "Params": item.Params, "value": item.Unk1[0].$.value}
+        doorValue.push(insertData)
+        setRender(random)
+      }
+    })
+  }
+  // TODO: Need to generate metatables when file is generate for retreive the door name? or just call a hash
 
   function sendAvailableDoorSounds(availableDoorSound: any){
     const initAvailableDoorSound: any = []
@@ -129,11 +133,9 @@ export function Home() {
             <Title sx={{ fontSize: 20 }}>#{index + 1} | {door.doorName}</Title>
             <Group>
                 <ActionIcon onClick={() => { setEditOpened(true) }}><ImPencil color={"blue"}/></ActionIcon>
-                {/* <ActionIcon onClick={() => { editCard(doorValue, index) }}><ImPencil color={"blue"}/></ActionIcon> */}
                 <ActionIcon onClick={() => { deleteCard(doorValue, index) }}><ImBin color={"red"}/></ActionIcon>
             </Group>
           </Group>
-          {/* <Text>Door name: {door.doorName}</Text> */}
           <Text>Door hash: hash_{door.doorHash}</Text>
           <Text>Door sound hash: {door.soundSet}</Text>
           <Text>Door sound params: {door.Params}</Text>

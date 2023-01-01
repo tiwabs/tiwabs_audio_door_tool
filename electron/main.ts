@@ -1,5 +1,4 @@
 import { app, BrowserWindow, dialog, ipcMain, shell } from "electron"
-import { forEach } from "../webpack/rules.webpack"
 const { readFileSync, writeFile } = require("fs")
 const xml2js = require('xml2js')
 
@@ -10,9 +9,9 @@ let mainWindow: BrowserWindow | null
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string
 
-const isDev = process.env.ELECTRON_ENV !== "development"
+// const isDev = process.env.ELECTRON_ENV !== "development"
 
-// let isDev = false
+let isDev = false
 
 function createWindow () {
   mainWindow = new BrowserWindow({
@@ -62,10 +61,10 @@ async function registerListeners () {
       saveFile(data)
     } else if (message == "openFile") {
       getFile()
+    } else {
+      // Receive unkown Message and Data from React
+      // console.log(message, JSON.stringify(data))
     }
-
-    // Receive Message and Data from React
-    // console.log(message, JSON.stringify(data))
   })
 }
 
@@ -98,10 +97,16 @@ const doorModelXML = (data: []) => {
   }, "")
 }
 
+const nameTableXML = (data: []) => {
+  return data.reduce((result: string, item: { doorName: string }) => {
+   return result + `d_${item.doorName}\n`
+  }, "")
+}
+
 function saveFile(data: []) {
   let fileSelectionPromise = dialog.showSaveDialog({defaultPath: "c:/door_test_game.dat151.rel.xml"});
   fileSelectionPromise.then(function(obj) {
-    console.log(JSON.stringify(obj, null, '\t'))
+    // console.log(JSON.stringify(obj, null, '\t'))
     const filePath = String(obj.filePath)
     let xml
     xml = `<?xml version="1.0" encoding="UTF-8"?>\n<Dat151>\n  <Version value="9458585" />\n  <Items>${doorXML(data)}${doorModelXML(data)}\n  </Items>\n</Dat151>`
@@ -109,19 +114,21 @@ function saveFile(data: []) {
       if (err) {
         console.error(err)
       }
+      let fileSelectionPromiseNameTable = dialog.showSaveDialog({defaultPath: "c:/game.dat151.nametable"});
+      fileSelectionPromiseNameTable.then(function(obj) {
+        const filePath = String(obj.filePath)
+        let nameTable: any
+        nameTable = `${nameTableXML(data)}`
+        writeFile(filePath, nameTable, (err: boolean) => {
+          if (err) {
+            console.error(err)
+          }
+        })
+      });
     })
   });
+  
 }
-
-const pickerOpts = {
-  types: [
-    {
-      description: 'XML Audio File',
-    },
-  ],
-  excludeAcceptAllOption: false,
-  multiple: false
-};
 
 var fileData: any
 function getFile() {
@@ -135,7 +142,6 @@ function getFile() {
 
 async function xmlToJSON(array: any) {
    xml2js.parseString(array, function(err: any, result: any) {
-    console.log(JSON.stringify(result['Dat151']['Items'], null, '\t'))
-    mainWindow?.webContents.send("xmlData", result['Dat151']['Items'])
+    mainWindow?.webContents.send("xmlData", result)
   })
 }
