@@ -114,7 +114,7 @@ function saveFile(data: []) {
       if (err) {
         console.error(err)
       }
-      let fileSelectionPromiseNameTable = dialog.showSaveDialog({defaultPath: "c:/game.dat151.nametable"});
+      let fileSelectionPromiseNameTable = dialog.showSaveDialog({defaultPath: "c:/door_test_game.dat151.nametable"});
       fileSelectionPromiseNameTable.then(function(obj) {
         const filePath = String(obj.filePath)
         let nameTable: any
