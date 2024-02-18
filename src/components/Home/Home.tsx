@@ -50,7 +50,7 @@ export function Home() {
 
     var hashedStr = ((hash >>> 0).toString(16))
 
-    if (hashedStr.length < 8) {
+    while (hashedStr.length < 8) {
       hashedStr = "0" + hashedStr
     }
 
