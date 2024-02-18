@@ -36,7 +36,7 @@ function createWindow () {
   mainWindow.on("closed", () => {
     mainWindow = null
   })
-  
+
   // Send config file to React ( Work also on build )
   mainWindow.webContents.on("did-finish-load", () => mainWindow?.webContents.send("Loaded", configFile) );
 }
@@ -127,7 +127,7 @@ function saveFile(data: []) {
       });
     })
   });
-  
+
 }
 
 var fileData: any

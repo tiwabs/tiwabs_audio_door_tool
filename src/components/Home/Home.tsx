@@ -15,11 +15,12 @@ var value: number
 export function Home() {
   // when app has loaded receive config from electron
   const [config, setConfig] = useState<any>([])
-  useEffect( () => { window.Main.on('Loaded', (receiveConfig: any) => { setConfig(receiveConfig); sendAvailableDoorSounds(receiveConfig.availableDoorSound) }) }, [])
+  useEffect(() => { window.Main.on('Loaded', (receiveConfig: any) => { setConfig(receiveConfig); sendAvailableDoorSounds(receiveConfig.availableDoorSound) }) }, [])
 
-  useEffect(()=> {
-    window.Main.on('xmlData', (data: any) => { xmlDataToArray(data['Dat151']['Items']) }) }, [])
-  
+  useEffect(() => {
+    window.Main.on('xmlData', (data: any) => { xmlDataToArray(data['Dat151']['Items']) })
+  }, [])
+
   // Shitty way to force re-render
   var random = Math.random() * 1000
   const [render, setRender] = useState<number>(0)
@@ -37,34 +38,40 @@ export function Home() {
     var length = keyLowered.length
     var hash, i
 
-    for (hash = i = 0; i < length; i++){
-        hash += keyLowered.charCodeAt(i)
-        hash += (hash << 10)
-        hash ^= (hash >>> 6)
+    for (hash = i = 0; i < length; i++) {
+      hash += keyLowered.charCodeAt(i)
+      hash += (hash << 10)
+      hash ^= (hash >>> 6)
     }
 
     hash += (hash << 3)
     hash ^= (hash >>> 11)
     hash += (hash << 15)
 
-    setConvertedHash((hash >>> 0).toString(16))
-    return ((hash >>> 0).toString(16))
+    var hashedStr = ((hash >>> 0).toString(16))
+
+    if (hashedStr.length < 8) {
+      hashedStr = "0" + hashedStr
+    }
+
+    setConvertedHash(hashedStr)
+    return hashedStr
   }
 
   function arrayFindValue() {
     config.availableDoorSound.find((item: any) => {
-      if (item.name === selectedDoorSound){
+      if (item.name === selectedDoorSound) {
         soundSet = item.soundSet
         Params = item.Params
         value = item.value
       }
     })
   }
-  
+
   function arrayFindExisting(findThisValue: string) {
     var result
     doorValue.find((item: any) => {
-      if (item.doorName === findThisValue){
+      if (item.doorName === findThisValue) {
         result = true
       }
     })
@@ -83,8 +90,7 @@ export function Home() {
         console.log("Item Unk1 = ", item.Unk1[0].$.value)
         const str = String(item.Name)
         const split = str.slice(2, -1)
-        // console.log(split)
-        const insertData = {"doorName": split, "doorHash": item.Name.includes("hash_") ? item.Name : getHash(`${item.Name}`), "soundSet": item.SoundSet, "Params": item.Params, "value": item.Unk1[0].$.value}
+        const insertData = { "doorName": split, "doorHash": item.Name.includes("hash_") ? item.Name : getHash(`${item.Name}`), "soundSet": item.SoundSet, "Params": item.Params, "value": item.Unk1[0].$.value }
         doorValue.push(insertData)
         setRender(random)
       }
@@ -92,10 +98,10 @@ export function Home() {
   }
   // TODO: Need to generate metatables when file is generate for retreive the door name? or just call a hash
 
-  function sendAvailableDoorSounds(availableDoorSound: any){
+  function sendAvailableDoorSounds(availableDoorSound: any) {
     const initAvailableDoorSound: any = []
     availableDoorSound.forEach((item: any) => {
-      const data = {"value": item.name, "label": item.name}
+      const data = { "value": item.name, "label": item.name }
       initAvailableDoorSound.push(data)
     })
     setAvailableDoorSound(initAvailableDoorSound)
@@ -107,13 +113,13 @@ export function Home() {
   }
 
   const doorsCard = () => {
-    return doorValue.map((door : any, index: any) => (
+    return doorValue.map((door: any, index: any) => (
       <>
         <Modal
-        opened={editOpened}
-        onClose={() => setEditOpened(false)}
-        closeOnClickOutside={false}
-        title="Edit Sound of the door"
+          opened={editOpened}
+          onClose={() => setEditOpened(false)}
+          closeOnClickOutside={false}
+          title="Edit Sound of the door"
         >
           <Select
             placeholder="Select the door sound"
@@ -124,7 +130,7 @@ export function Home() {
           />
           <Button variant="outline" color={'red'} onClick={() => {
             arrayFindValue()
-            const newData = {"doorName": door.doorName, "doorHash": door.doorHash, "soundSet": soundSet, "Params": Params, "value": value}
+            const newData = { "doorName": door.doorName, "doorHash": door.doorHash, "soundSet": soundSet, "Params": Params, "value": value }
             doorValue[index] = newData
           }}>Save Change</Button>
         </Modal>
@@ -132,8 +138,8 @@ export function Home() {
           <Group position="apart">
             <Title sx={{ fontSize: 20 }}>#{index + 1} | {door.doorName}</Title>
             <Group>
-                <ActionIcon onClick={() => { setEditOpened(true) }}><ImPencil color={"blue"}/></ActionIcon>
-                <ActionIcon onClick={() => { deleteCard(doorValue, index) }}><ImBin color={"red"}/></ActionIcon>
+              <ActionIcon onClick={() => { setEditOpened(true) }}><ImPencil color={"blue"} /></ActionIcon>
+              <ActionIcon onClick={() => { deleteCard(doorValue, index) }}><ImBin color={"red"} /></ActionIcon>
             </Group>
           </Group>
           <Text>Door hash: hash_{door.doorHash}</Text>
@@ -141,7 +147,7 @@ export function Home() {
           <Text>Door sound params: {door.Params}</Text>
           <Text>Door sound value: {door.value}</Text>
         </Card>
-        <Space h="md"/>
+        <Space h="md" />
       </>
     ))
   }
@@ -158,9 +164,10 @@ export function Home() {
         >
           <TextInput placeholder="Enter the door name" value={HashToConvert} onChange={(event) => {
             setHashToConvert(event.currentTarget.value)
-            getHash(HashToConvert)}} 
+            getHash(HashToConvert)
+          }}
           />
-          <Space h="md"/>
+          <Space h="md" />
           <Select
             placeholder="Select the door sound"
             clearable
@@ -168,13 +175,13 @@ export function Home() {
             onChange={setSelectedDoorSound}
             data={availableDoorSound}
           />
-          <Space h="md"/>
+          <Space h="md" />
           <Button
             variant="outline" color={'red'}
             onClick={() => {
               arrayFindValue()
               if (!arrayFindExisting(HashToConvert)) {
-                const insertData = {"doorName": HashToConvert, "doorHash": getHash(HashToConvert), "soundSet": soundSet, "Params": Params, "value": value}
+                const insertData = { "doorName": HashToConvert, "doorHash": getHash(HashToConvert), "soundSet": soundSet, "Params": Params, "value": value }
                 doorValue.push(insertData)
                 setRender(random)
               } else {
@@ -186,14 +193,14 @@ export function Home() {
                   icon: "!",
                 })
               }
-              
+
             }}
           >
             Add a door
           </Button>
-          <Space h="md"/>
+          <Space h="md" />
           <Text sx={{ fontSize: "15px", color: "white" }}>
-            Converted Hash: {convertedHash? convertedHash : "undefined"} | Door sound: {selectedDoorSound? selectedDoorSound : "undefined"}
+            Converted Hash: {convertedHash ? convertedHash : "undefined"} | Door sound: {selectedDoorSound ? selectedDoorSound : "undefined"}
           </Text>
         </Modal>
         <Paper
@@ -203,20 +210,20 @@ export function Home() {
             backgroundColor: "rgba(37, 37, 37, 0.5)"
           }}
         >
-          <Space h="20"/>
-          <SimpleGrid cols={1} verticalSpacing="xs" sx={{padding: "10px"}}>
+          <Space h="20" />
+          <SimpleGrid cols={1} verticalSpacing="xs" sx={{ padding: "10px" }}>
             <Group grow>
               <Group grow>
-                <Button variant="outline" color={'red'} onClick={()=> {window.Main.sendMessage('openFile')}}>Import file</Button>
-                <Button disabled variant="outline" color={'red'} onClick={()=> {}}>Settings</Button>
+                <Button variant="outline" color={'red'} onClick={() => { window.Main.sendMessage('openFile') }}>Import file</Button>
+                <Button disabled variant="outline" color={'red'} onClick={() => { }}>Settings</Button>
               </Group>
-              <Button variant="outline" color={'red'} onClick={()=> {setNewOpened(!newOpened)}}>Add a new door</Button>
+              <Button variant="outline" color={'red'} onClick={() => { setNewOpened(!newOpened) }}>Add a new door</Button>
             </Group>
           </SimpleGrid>
-          <ScrollArea style={{ height: 680, padding: "10px"}}>
+          <ScrollArea style={{ height: 680, padding: "10px" }}>
             {doorsCard()}
           </ScrollArea>
-          <Group grow sx={{padding: '10px'}}>
+          <Group grow sx={{ padding: '10px' }}>
             <Button variant="outline" color={"red"} onClick={() => {
               if (doorValue.length < 1) {
                 showNotification({
@@ -229,12 +236,12 @@ export function Home() {
               } else {
                 window.Main.sendMessage('generate', doorValue)
               }
-              }}>Generate Audio File</Button>
+            }}>Generate Audio File</Button>
           </Group>
           {/* <Space h="15px"/> */}
           <Center>
             <Text>Created by [</Text>
-            <Text component="a" onClick={()=> {window.Main.sendMessage('discord', 'https://discord.gg/badHRSF')}} sx={{color: "red", "&:hover":{color: "blue"}}}> Tiwabs</Text>
+            <Text component="a" onClick={() => { window.Main.sendMessage('discord', 'https://discord.gg/badHRSF') }} sx={{ color: "red", "&:hover": { color: "blue" } }}> Tiwabs</Text>
             <Text>]</Text>
           </Center>
         </Paper>
